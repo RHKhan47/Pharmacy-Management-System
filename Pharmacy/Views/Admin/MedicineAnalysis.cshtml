@@ -1,0 +1,176 @@
+﻿@model MedicineSalesViewModel
+
+@{
+    ViewBag.Title = "Medicine Analysis";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Medicine Sales Analysis</h1>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs mb-4" id="salesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="bar-chart-tab" data-bs-toggle="tab" href="#bar-chart" role="tab" aria-controls="bar-chart" aria-selected="true">Medicine Sales</a>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+        <!-- Medicine Sales Tab -->
+        <div class="tab-pane fade show active" id="bar-chart" role="tabpanel" aria-labelledby="bar-chart-tab">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-3">Medicine Sales</h3>
+                    <div class="mb-3">
+                        <label for="barChartYear" class="form-label">Select Year:</label>
+                        <select id="barChartYear" class="form-select">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
+                    </div>
+                    <div id="medicineSalesBarChartYearly" class="chart-container" style="height: 350px;"></div>
+                    <div class="mb-3 mt-3">
+                        <label for="barChartMonth" class="form-label">Select Month:</label>
+                        <select id="barChartMonth" class="form-select">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div id="medicineSalesBarChartMonthly" class="chart-container" style="height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var chartBarYearly;
+        var chartBarMonthly;
+
+        function updateCharts(year, month) {
+            $.ajax({
+                url: '@Url.Action("MedicineAnalysis", "Admin")',
+                type: 'GET',
+                data: { year: year, month: month },
+                success: function (data) {
+                    var yearlyData = data.YearlySalesData;
+                    var monthlyData = data.MonthlySalesData;
+
+                    // Process data for the yearly chart
+                    function processYearlyData(data, type) {
+                        return data.map(item => item[type] || 0);
+                    }
+
+                    // Process data for the monthly chart
+                    function processMonthlyData(data, type) {
+                        let daysInMonth = 31; // Maximum possible days in any month
+                        let salesData = Array.from({ length: daysInMonth }, () => 0);
+
+                        data.forEach(item => {
+                            let day = item.Day; // Assuming your data includes a 'Day' field
+                            salesData[day - 1] = item[type] || 0; // Adjusting for 0-based index
+                        });
+
+                        return salesData;
+                    }
+
+                    // Destroy existing charts if they exist to prevent overlap
+                    if (chartBarYearly) {
+                        chartBarYearly.destroy();
+                    }
+                    if (chartBarMonthly) {
+                        chartBarMonthly.destroy();
+                    }
+
+                    // Yearly data series
+                    var yearlyTotalSales = processYearlyData(yearlyData, 'TotalSales');
+                    var yearlyOnlineSales = processYearlyData(yearlyData, 'OnlineSales');
+                    var yearlyRetailSales = processYearlyData(yearlyData, 'RetailSales');
+
+                    // Monthly data series
+                    var monthlyTotalSales = processMonthlyData(monthlyData, 'TotalSales');
+                    var monthlyOnlineSales = processMonthlyData(monthlyData, 'OnlineSales');
+                    var monthlyRetailSales = processMonthlyData(monthlyData, 'RetailSales');
+
+                    // Medicine Sales - Yearly
+                    var optionsBarYearly = {
+                        chart: {
+                            type: 'bar',
+                            height: 350
+                        },
+                        series: [{
+                            name: 'Total Sales',
+                            data: yearlyTotalSales
+                        }, {
+                            name: 'Online Sales',
+                            data: yearlyOnlineSales
+                        }, {
+                            name: 'Retail Sales',
+                            data: yearlyRetailSales
+                        }],
+                        xaxis: {
+                            categories: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                        }
+                    };
+                    chartBarYearly = new ApexCharts(document.querySelector("#medicineSalesBarChartYearly"), optionsBarYearly);
+                    chartBarYearly.render();
+
+                    // Medicine Sales - Monthly
+                    var optionsBarMonthly = {
+                        chart: {
+                            type: 'bar',
+                            height: 350
+                        },
+                        series: [{
+                            name: 'Total Sales',
+                            data: monthlyTotalSales
+                        }, {
+                            name: 'Online Sales',
+                            data: monthlyOnlineSales
+                        }, {
+                            name: 'Retail Sales',
+                            data: monthlyRetailSales
+                        }],
+                        xaxis: {
+                            categories: Array.from({ length: 31 }, (_, i) => i + 1) // Days 1 to 31
+                        }
+                    };
+                    chartBarMonthly = new ApexCharts(document.querySelector("#medicineSalesBarChartMonthly"), optionsBarMonthly);
+                    chartBarMonthly.render();
+                }
+            });
+        }
+
+        // Initial chart render
+        var initialYear = parseInt(document.getElementById('barChartYear').value);
+        var initialMonth = parseInt(document.getElementById('barChartMonth').value);
+        updateCharts(initialYear, initialMonth);
+
+        // Event listeners for dropdown changes
+        document.getElementById('barChartYear').addEventListener('change', function () {
+            var selectedYear = parseInt(this.value);
+            var selectedMonth = parseInt(document.getElementById('barChartMonth').value);
+            updateCharts(selectedYear, selectedMonth);
+        });
+
+        document.getElementById('barChartMonth').addEventListener('change', function () {
+            var selectedYear = parseInt(document.getElementById('barChartYear').value);
+            var selectedMonth = parseInt(this.value);
+            updateCharts(selectedYear, selectedMonth);
+        });
+    });
+</script>

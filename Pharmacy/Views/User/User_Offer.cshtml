@@ -1,0 +1,157 @@
+﻿@{
+    ViewBag.Title = "Ongoing Sales";
+    ViewBag.Header = "Ongoing Sales";
+    Layout = "~/Views/Shared/User_Layout.cshtml";
+}
+
+<!-- Section: Ongoing Sales -->
+<section class="px-4 py-20 bg-white md:px-0">
+    <div class="container max-w-7xl mx-auto">
+        <!-- Title -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl">
+                <span class="block xl:inline">Ongoing Sales</span>
+            </h1>
+            <p class="mt-4 text-gray-500 sm:max-w-md mx-auto lg:text-xl">Browse through our current sales and take advantage of these amazing offers.</p>
+        </div>
+
+        <!-- Sales Cards -->
+        <div class="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-10">
+            <!-- Sale Item 1 -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <img src="https://thumbor.forbes.com/thumbor/fit-in/900x510/https://www.forbes.com/health/wp-content/uploads/2023/06/vitamin_d.jpeg.jpg" alt="Product" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Vitamin D3 - 30% Off</h2>
+                    <p class="mt-2 text-gray-600">Boost your immunity with our Vitamin D3 supplements, now at 30% off. Limited stock available!</p>
+                    <div class="mt-4">
+                        <span class="text-gray-900 font-bold">$14.99</span>
+                        <span class="ml-2 text-sm line-through text-gray-500">$21.99</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sale Item 2 -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <img src="https://www.growinggreatgrins.com/wp-content/uploads/2020/01/cough-syrup.webp" alt="Product" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Blood Pressure Monitor - 15% Off</h2>
+                    <p class="mt-2 text-gray-600">Keep track of your health with our advanced blood pressure monitor, now at a discounted price!</p>
+                    <div class="mt-4">
+                        <span class="text-gray-900 font-bold">$69.99</span>
+                        <span class="ml-2 text-sm line-through text-gray-500">$79.99</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sale Item 3 -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <img src="https://www.reial.ee/files/726884/catitems/SC_vaike-26-4c87ec6c8158241d58ecc27915a3f65a.jpg" alt="Product" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Pain Relief Balm - 50% Off</h2>
+                    <p class="mt-2 text-gray-600">Experience fast pain relief with our top-selling balm, available at half the price for a limited time!</p>
+                    <div class="mt-4">
+                        <span class="text-gray-900 font-bold">$9.99</span>
+                        <span class="ml-2 text-sm line-through text-gray-500">$19.99</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div class="mt-16 text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">Limited Time Offer!</h2>
+            <p class="mt-4 text-gray-500">Hurry up! This offer ends in:</p>
+            <div class="flex justify-center space-x-4 mt-6">
+                <div class="bg-indigo-600 text-white p-4 rounded-md">
+                    <span class="text-2xl font-bold" id="days">00</span> days
+                </div>
+                <div class="bg-indigo-600 text-white p-4 rounded-md">
+                    <span class="text-2xl font-bold" id="hours">00</span> hours
+                </div>
+                <div class="bg-indigo-600 text-white p-4 rounded-md">
+                    <span class="text-2xl font-bold" id="minutes">00</span> minutes
+                </div>
+                <div class="bg-indigo-600 text-white p-4 rounded-md">
+                    <span class="text-2xl font-bold" id="seconds">00</span> seconds
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Testimonials -->
+        <div class="mt-20">
+            <h2 class="text-3xl font-extrabold text-gray-900 text-center">What Our Customers Say</h2>
+            <div class="mt-8 flex flex-wrap justify-center">
+                <div class="bg-gray-100 p-6 rounded-lg shadow-md m-4 max-w-xs">
+                    <p class="text-gray-600">"The Vitamin D3 has made a noticeable difference in my energy levels. Highly recommend!"</p>
+                    <p class="mt-4 font-bold text-gray-800">— Sarah J.</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-md m-4 max-w-xs">
+                    <p class="text-gray-600">"Great service and fantastic prices! I always find what I need."</p>
+                    <p class="mt-4 font-bold text-gray-800">— Mark T.</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-md m-4 max-w-xs">
+                    <p class="text-gray-600">"The pain relief balm works wonders! It's a must-have in our home."</p>
+                    <p class="mt-4 font-bold text-gray-800">— Emily R.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Promotion Section -->
+        <div class="mt-16 text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl">
+                <span class="block xl:inline">Featured Promotion</span>
+            </h2>
+            <p class="mt-4 text-gray-500 sm:max-w-md mx-auto lg:text-xl">Don't miss out on our exclusive featured deal.</p>
+            <div class="mt-10">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <img src="https://bloximages.newyork1.vip.townnews.com/uniondemocrat.com/content/tncms/assets/v3/editorial/1/6e/16e22bbc-82f8-11ed-8dc5-b789b840ddb8/63a601ae54c26.image.jpg?resize=1763%2C1175" alt="Promotion" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h2 class="text-lg font-semibold text-gray-900">Winter Wellness Pack - Buy One, Get One Free</h2>
+                        <p class="mt-2 text-gray-600">Stay healthy this winter with our specially curated wellness pack. Limited-time offer: Buy one, get one free!</p>
+                        <a href="~/User/ViewMedicines">
+                            <button class="mt-4 inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                                Shop Now
+                            </button>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Countdown Timer Script -->
+<script>
+    // Set the date we're counting down to
+    const countDownDate = new Date("Sep 30, 2024 15:00:00").getTime();
+
+    // Update the count down every 1 second
+    const x = setInterval(function () {
+        // Get today's date and time
+        const now = new Date().getTime();
+        // Find the distance between now and the count down date
+        const distance = countDownDate - now;
+
+        // Time calculations for days, hours, minutes and seconds
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Display the result in the respective elements
+        document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+        document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+
+        // If the count down is over, write some text
+        if (distance < 0) {
+            clearInterval(x);
+            document.getElementById("days").innerHTML = "00";
+            document.getElementById("hours").innerHTML = "00";
+            document.getElementById("minutes").innerHTML = "00";
+            document.getElementById("seconds").innerHTML = "00";
+        }
+    }, 1000);
+</script>

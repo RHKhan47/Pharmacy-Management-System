@@ -1,0 +1,198 @@
+﻿@model IEnumerable<Pharma.Models.Seller>
+
+@{
+    ViewBag.Title = "Manage Sellers";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<div class="container mt-3">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Manage Sellers</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search sellers...">
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Full Name</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sellerTableBody">
+                        @foreach (var seller in Model)
+                        {
+                            <tr>
+                                <td>@seller.Username</td>
+                                <td>@seller.Email</td>
+                                <td>@seller.FullName</td>
+                                <td>@seller.Phone</td>
+                                <td>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal"
+                                            data-bs-id="@seller.SellerID" data-bs-username="@seller.Username"
+                                            data-bs-email="@seller.Email" data-bs-fullname="@seller.FullName"
+                                            data-bs-phone="@seller.Phone">
+                                        Update
+                                    </button>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#passwordModal"
+                                            data-bs-id="@seller.SellerID">
+                                        Change Password
+                                    </button>
+                                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                            data-bs-id="@seller.SellerID">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Seller</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("UpdateSeller", "Admin", FormMethod.Post, new { @id = "updateForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SellerID" id="updateSellerID" />
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.First().Username, new { @class = "form-label" })
+                        <input type="text" name="Username" class="form-control" id="updateUsername" />
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.First().Email, new { @class = "form-label" })
+                        <input type="email" name="Email" class="form-control" id="updateEmail" />
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.First().FullName, new { @class = "form-label" })
+                        <input type="text" name="FullName" class="form-control" id="updateFullName" />
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.First().Phone, new { @class = "form-label" })
+                        <input type="text" name="Phone" class="form-control" id="updatePhone" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("ChangeSellerPassword", "Admin", FormMethod.Post, new { @id = "passwordForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SellerID" id="passwordSellerID" />
+                    <div class="mb-3">
+                        @Html.Label("New Password", new { @class = "form-label" })
+                        <input type="password" name="newPassword" class="form-control" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary disabled">Change Password</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Seller</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this seller?</p>
+                @using (Html.BeginForm("DeleteSeller", "Admin", FormMethod.Post, new { @id = "deleteForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SellerID" id="deleteSellerID" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keyup', function () {
+                const filter = searchInput.value.toLowerCase();
+                const rows = document.querySelectorAll('#sellerTableBody tr');
+                rows.forEach(row => {
+                    const cells = row.getElementsByTagName('td');
+                    let match = false;
+                    for (let i = 0; i < cells.length; i++) {
+                        if (cells[i].innerText.toLowerCase().includes(filter)) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    row.style.display = match ? '' : 'none';
+                });
+            });
+
+            const updateModal = document.getElementById('updateModal');
+            updateModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const sellerId = button.getAttribute('data-bs-id');
+                const username = button.getAttribute('data-bs-username');
+                const email = button.getAttribute('data-bs-email');
+                const fullname = button.getAttribute('data-bs-fullname');
+                const phone = button.getAttribute('data-bs-phone');
+
+                const modal = updateModal;
+                modal.querySelector('#updateSellerID').value = sellerId;
+                modal.querySelector('#updateUsername').value = username;
+                modal.querySelector('#updateEmail').value = email;
+                modal.querySelector('#updateFullName').value = fullname;
+                modal.querySelector('#updatePhone').value = phone;
+            });
+
+            const passwordModal = document.getElementById('passwordModal');
+            passwordModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const sellerId = button.getAttribute('data-bs-id');
+
+                const modal = passwordModal;
+                modal.querySelector('#passwordSellerID').value = sellerId;
+            });
+
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const sellerId = button.getAttribute('data-bs-id');
+
+                const modal = deleteModal;
+                modal.querySelector('#deleteSellerID').value = sellerId;
+            });
+        });
+    </script>
+}

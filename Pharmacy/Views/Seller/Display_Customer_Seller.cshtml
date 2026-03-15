@@ -1,0 +1,155 @@
+﻿@{
+    ViewBag.Title = "Display Customers";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container-fluid mt-3">
+  
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title"> Customer Management</h5>
+                </div>
+                <div class="card-body">
+
+                    <!-- Search Bar -->
+                    <div class="mb-3">
+                        <input type="text" id="searchInput" onkeyup="searchTable()" class="form-control" placeholder="Search for customers...">
+                    </div>
+
+                    <!-- Increased table width -->
+                    <div style="height: 400px; overflow-y: auto;">
+                        <table class="table table-bordered table-hover w-100" id="customerTable">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var customer in Model)
+                                {
+                                    <tr>
+                                        <td>@customer.Username</td>
+                                        <td>@customer.Email</td>
+                                        <td>@customer.FullName</td>
+                                        <td>@customer.Address</td>
+                                        <td>@customer.Phone</td>
+                                        <td>
+                                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="populateUpdateModal('@customer.CustomerID', '@customer.Username', '@customer.Email', '@customer.FullName', '@customer.Address', '@customer.Phone')">Update</button>
+                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal" onclick="populateChangePasswordModal('@customer.CustomerID', '@customer.Username')">Change Password</button>
+                                            <a href="@Url.Action("DeleteCustomer", "Seller", new { id = customer.CustomerID })" class="btn btn-danger">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateForm" method="post" action="@Url.Action("UpdateCustomer", "Seller")">
+                    @Html.AntiForgeryToken() <!-- Add this line for the anti-forgery token -->
+                    <input type="hidden" id="CustomerID" name="CustomerID" />
+                    <div class="mb-3">
+                        <label for="Username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="Username" name="Username" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="Email" name="Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="FullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="FullName" name="FullName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="Address" name="Address" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="Phone" name="Phone" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm" method="post" action="@Url.Action("ChangePassword", "Seller")">
+                    <input type="hidden" id="CustomerId" name="customerId" />
+                    <div class="mb-3">
+                        <label for="NewPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="NewPassword" name="newPassword" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchTable() {
+        let input = document.getElementById('searchInput');
+        let filter = input.value.toLowerCase();
+        let table = document.getElementById('customerTable');
+        let tr = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < tr.length; i++) {
+            let td = tr[i].getElementsByTagName('td');
+            let found = false;
+            for (let j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    if (td[j].innerText.toLowerCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            tr[i].style.display = found ? "" : "none";
+        }
+    }
+
+    function populateUpdateModal(id, username, email, fullName, address, phone) {
+        document.getElementById('CustomerID').value = id;
+        document.getElementById('Username').value = username;
+        document.getElementById('Email').value = email;
+        document.getElementById('FullName').value = fullName;
+        document.getElementById('Address').value = address;
+        document.getElementById('Phone').value = phone;
+    }
+
+    function populateChangePasswordModal(id, username) {
+        document.getElementById('CustomerId').value = id;
+    }
+</script>

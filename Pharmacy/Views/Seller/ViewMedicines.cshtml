@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Pharma.Models.Medicine>
+
+@{
+    ViewBag.Title = "Available Medicines";
+}
+
+<h2>Available Medicines</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Expiry Date</th>
+            <th>Quantity</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.MedicineName</td>
+                <td>@item.Price</td>
+                @*<td>@item.ExpiryDate.ToShortDateString()</td>*@
+                <td>@item.Quantity</td>
+                <td>
+                    @using (Html.BeginForm("AddToList", "Seller", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("medicineId", item.MedicineID)
+                        <input type="number" name="quantity" min="1" max="@item.Quantity" value="1" class="form-control" style="width: 80px; display: inline-block;" />
+                        <button type="submit" class="btn btn-primary">Add to List</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

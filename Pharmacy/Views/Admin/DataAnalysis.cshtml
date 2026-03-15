@@ -1,0 +1,185 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "DataAnalysis";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Sales Dashboard</h1>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs mb-4" id="salesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="line-chart-tab" data-bs-toggle="tab" href="#line-chart" role="tab" aria-controls="line-chart" aria-selected="true">Sales Trends</a>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+        <!-- Sales Trends Tab -->
+        <div class="tab-pane fade show active" id="line-chart" role="tabpanel" aria-labelledby="line-chart-tab">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-3">Sales Trends</h3>
+                    <div class="mb-3">
+                        <label for="lineChartYear" class="form-label">Select Year:</label>
+                        <select id="lineChartYear" class="form-select">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
+                    </div>
+                    <div id="salesLineChartYearly" class="chart-container" style="height: 300px;"></div>
+                    <div class="mb-3 mt-3">
+                        <label for="lineChartMonth" class="form-label">Select Month:</label>
+                        <select id="lineChartMonth" class="form-select">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div id="salesLineChartMonthly" class="chart-container" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var chartLineYearly;
+        var chartLineMonthly;
+
+        function updateCharts(year, month) {
+            $.ajax({
+                url: '@Url.Action("DataAnalysis", "Admin")',
+                type: 'GET',
+                data: { year: year, month: month },
+                success: function (data) {
+                    var yearlyOnlineData = data.YearlyOnlineData;
+                    var monthlyOnlineData = data.MonthlyOnlineData;
+                    var yearlyRetailData = data.YearlyRetailData;
+                    var monthlyRetailData = data.MonthlyRetailData;
+
+                    // Process data for yearly chart (same as before)
+                    function processYearlyData(data, type) {
+                        return data.map(item => item[type] || 0);
+                    }
+
+                    // Process data for monthly chart (map day to correct index)
+                    function processMonthlyData(data, type) {
+                        var result = Array(31).fill(0); // Fill with zeros for each day of the month
+                        data.forEach(item => {
+                            var day = item.Day; // Assuming your data has a 'Day' property indicating the day of the month
+                            result[day - 1] = item[type] || 0;
+                        });
+                        return result;
+                    }
+
+                    // Destroy existing charts if they exist to prevent overlap
+                    if (chartLineYearly) {
+                        chartLineYearly.destroy();
+                    }
+                    if (chartLineMonthly) {
+                        chartLineMonthly.destroy();
+                    }
+
+                    // Calculate the combined revenue for yearly data
+                    var yearlyRevenue = [];
+                    var yearlyOnline = processYearlyData(yearlyOnlineData, 'Online');
+                    var yearlyRetail = processYearlyData(yearlyRetailData, 'Retail');
+                    for (var i = 0; i < 12; i++) {
+                        yearlyRevenue.push((yearlyOnline[i] || 0) + (yearlyRetail[i] || 0));
+                    }
+
+                    // Calculate the combined revenue for monthly data
+                    var monthlyRevenue = [];
+                    var monthlyOnline = processMonthlyData(monthlyOnlineData, 'Online');
+                    var monthlyRetail = processMonthlyData(monthlyRetailData, 'Retail');
+                    for (var i = 0; i < 31; i++) {
+                        monthlyRevenue.push((monthlyOnline[i] || 0) + (monthlyRetail[i] || 0));
+                    }
+
+                    // X-axis categories should match the exact number of days in the selected month
+                    var daysInMonth = new Date(year, month, 0).getDate();
+                    var categories = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+                    // Sales Trends - Yearly
+                    var optionsLineYearly = {
+                        chart: {
+                            type: 'line',
+                            height: 300
+                        },
+                        series: [{
+                            name: 'Revenue',
+                            data: yearlyRevenue
+                        }, {
+                            name: 'Online',
+                            data: yearlyOnline
+                        }, {
+                            name: 'Retail',
+                            data: yearlyRetail
+                        }],
+                        xaxis: {
+                            categories: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                        }
+                    };
+                    chartLineYearly = new ApexCharts(document.querySelector("#salesLineChartYearly"), optionsLineYearly);
+                    chartLineYearly.render();
+
+                    // Sales Trends - Monthly
+                    var optionsLineMonthly = {
+                        chart: {
+                            type: 'line',
+                            height: 300
+                        },
+                        series: [{
+                            name: 'Revenue',
+                            data: monthlyRevenue.slice(0, daysInMonth) // Only show data up to the number of days in the month
+                        }, {
+                            name: 'Online',
+                            data: monthlyOnline.slice(0, daysInMonth)
+                        }, {
+                            name: 'Retail',
+                            data: monthlyRetail.slice(0, daysInMonth)
+                        }],
+                        xaxis: {
+                            categories: categories
+                        }
+                    };
+                    chartLineMonthly = new ApexCharts(document.querySelector("#salesLineChartMonthly"), optionsLineMonthly);
+                    chartLineMonthly.render();
+                },
+                error: function () {
+                    alert('Error fetching data');
+                }
+            });
+        }
+
+        var yearSelect = document.getElementById('lineChartYear');
+        var monthSelect = document.getElementById('lineChartMonth');
+
+        // Initial chart render
+        updateCharts(yearSelect.value, monthSelect.value);
+
+        // Update charts when selecting different year or month
+        yearSelect.addEventListener('change', function () {
+            updateCharts(yearSelect.value, monthSelect.value);
+        });
+
+        monthSelect.addEventListener('change', function () {
+            updateCharts(yearSelect.value, monthSelect.value);
+        });
+    });
+</script>

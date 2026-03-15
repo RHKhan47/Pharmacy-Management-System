@@ -1,0 +1,242 @@
+﻿@model IEnumerable<Pharma.Models.Medicine>
+@{
+    ViewBag.Title = "Shop";
+    ViewBag.Header = "Shop";
+    Layout = "~/Views/Shared/Guest_Layout.cshtml";
+}
+
+
+<section class="px-2 py-32 bg-white md:px-0">
+    <div class="container items-center max-w-6xl px-8 mx-auto xl:px-5">
+        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl">
+            <span class="block xl:inline">Our Products</span>
+        </h1>
+
+        <!-- Popup Notification centered at the top -->
+        <div id="successPopup" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-4 rounded-lg shadow-lg hidden transition transform duration-500 ease-in-out">
+            <p id="popupSuccessMessage"></p>
+        </div>
+
+        @if (TempData["OrderMessage"] != null)
+        {
+            <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set the message from TempData to the popup's content
+            document.getElementById('popupSuccessMessage').innerText = '@TempData["OrderMessage"]';
+
+            // Show the popup by removing the 'hidden' class
+            var successPopup = document.getElementById('successPopup');
+            successPopup.classList.remove('hidden');
+
+            // Hide the popup after 2 seconds
+            setTimeout(function () {
+                successPopup.classList.add('hidden');
+            }, 2000); // 2000 milliseconds = 2 seconds
+        });
+            </script>
+        }
+
+        <!-- Search and Filter Section -->
+        <div class="flex flex-wrap items-center justify-between mt-8">
+            <!-- Search Box -->
+            <div class="w-full md:w-1/2">
+                <input type="text" id="searchBox" placeholder="Search products..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent">
+            </div>
+
+            <!-- Category Filter -->
+            <div class="w-full mt-4 md:w-auto md:mt-0">
+                <select id="categoryFilter" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent">
+                    <option value="">Select Category</option>
+                    <option value="Analgesics">Analgesics</option>
+                    <option value="Antibiotics">Antibiotics</option>
+                    <option value="Antivirals">Antivirals</option>
+                    <option value="Antifungals">Antifungals</option>
+                    <option value="Antihistamines">Antihistamines</option>
+                    <option value="Antidepressants">Antidepressants</option>
+                    <option value="Antacids">Antacids</option>
+                    <option value="Antihypertensives">Antihypertensives</option>
+                    <option value="Antidiabetics">Antidiabetics</option>
+                </select>
+            </div>
+
+            <!-- Sort Filter -->
+            <div class="w-full mt-4 md:w-auto md:mt-0">
+                <select id="sortFilter" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent">
+                    <option value="">Sort by</option>
+                    <option value="lowToHigh">Price: Low to High</option>
+                    <option value="highToLow">Price: High to Low</option>
+                    <option value="recentlyAdded">Recently Added</option>
+                </select>
+            </div>
+
+            <!-- Stock Filter -->
+            <div class="w-full mt-4 md:w-auto md:mt-0">
+                <select id="stockFilter" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent">
+                    <option value="">Filter by Stock</option>
+                    <option value="inStock">In Stock</option>
+                    <option value="outOfStock">Out of Stock</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Container for the medicine cards -->
+        <div id="medicineResults" class="vertical-scroll-container mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var medicine in Model)
+            {
+                <div class="medicine-card flex flex-col justify-between bg-white shadow rounded-lg overflow-hidden" data-name="@medicine.MedicineName" data-generic="@medicine.GenericName" data-category="@medicine.Category" data-price="@medicine.Price" data-id="@medicine.MedicineID" data-quantity="@medicine.Quantity">
+                    <!-- Image -->
+                    <div class="image-container h-48">
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(medicine.ImageData)" alt="@medicine.MedicineName" class="w-full h-full object-cover">
+                    </div>
+
+                    <div class="p-4 flex flex-col flex-grow">
+                        <!-- Medicine Name with link to details -->
+                        <h2 class="text-xl font-semibold text-gray-800">
+                            <a href="@Url.Action("GuestMedicineDetails", "Guest", new { id = medicine.MedicineID })" class="text-indigo-600 hover:underline">
+                                @medicine.MedicineName
+                            </a>
+                        </h2>
+                        <p class="mt-2 text-gray-600">@medicine.Manufacturer</p>
+                        <div class="flex items-center justify-between mt-4">
+                            <h3 class="text-lg font-semibold text-gray-800">$@medicine.Price</h3>
+                            @if (medicine.Quantity > 0)
+                            {
+                                <form class="add-to-cart-form" action="@Url.Action("AddToCart", "User")" method="post" data-medicine-id="@medicine.MedicineID">
+                                    @Html.AntiForgeryToken()
+                                    @Html.Hidden("medicineId", medicine.MedicineID)
+                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Add to Cart</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <p class="font-bold text-red-600">Out of Stock</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex justify-center mt-8">
+            <button id="prevPage" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Previous</button>
+            <span id="pageInfo" class="mx-4 text-lg font-semibold"></span>
+            <button id="nextPage" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Next</button>
+        </div>
+    </div>
+</section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const medicinesPerPage = 20; // Define how many items per page
+        let currentPage = 1;
+        let medicines = $(".medicine-card");
+
+        // Store the original order of the medicine cards
+        medicines.each(function (index) {
+            $(this).data("original-order", index);
+        });
+
+        function filterAndSortMedicines() {
+            var searchQuery = $("#searchBox").val().toLowerCase();
+            var selectedCategory = $("#categoryFilter").val();
+            var sortOption = $("#sortFilter").val();
+            var stockFilter = $("#stockFilter").val();
+
+            // Show all medicines initially
+            medicines = $(".medicine-card");
+
+            // Filter medicines based on search query, category, and stock status
+            medicines = medicines.filter(function () {
+                var medicineName = $(this).data("name").toLowerCase();
+                var genericName = $(this).data("generic").toLowerCase();
+                var category = $(this).data("category");
+                var quantity = $(this).data("quantity");
+
+                var matchesSearch = medicineName.includes(searchQuery) || genericName.includes(searchQuery);
+                var matchesCategory = selectedCategory === "" || category === selectedCategory;
+                var matchesStock = stockFilter === "" || (stockFilter === "inStock" && quantity > 0) || (stockFilter === "outOfStock" && quantity === 0);
+
+                return matchesSearch && matchesCategory && matchesStock;
+            });
+
+            // Sort the filtered medicines
+            medicines.sort(function (a, b) {
+                if (sortOption === "lowToHigh") {
+                    return $(a).data("price") - $(b).data("price");
+                } else if (sortOption === "highToLow") {
+                    return $(b).data("price") - $(a).data("price");
+                } else if (sortOption === "recentlyAdded") {
+                    return $(b).data("id") - $(a).data("id");
+                } else {
+                    // Default sorting based on the original order
+                    return $(a).data("original-order") - $(b).data("original-order");
+                }
+            });
+
+            // Apply pagination
+            paginateMedicines();
+        }
+
+        function paginateMedicines() {
+            const totalPages = Math.ceil(medicines.length / medicinesPerPage);
+            const start = (currentPage - 1) * medicinesPerPage;
+            const end = start + medicinesPerPage;
+
+            // Hide all medicines, then show only the ones on the current page
+            $(".medicine-card").hide();
+            medicines.slice(start, end).show();
+
+            // Update page info and button states
+            $("#pageInfo").text(`Page ${currentPage} of ${totalPages}`);
+            $("#prevPage").prop("disabled", currentPage === 1);
+            $("#nextPage").prop("disabled", currentPage === totalPages);
+        }
+
+        // Event listeners
+        $("#searchBox, #categoryFilter, #sortFilter, #stockFilter").on("input change", filterAndSortMedicines);
+
+        // Pagination controls
+        $("#prevPage").click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                paginateMedicines();
+            }
+        });
+
+        $("#nextPage").click(function () {
+            const totalPages = Math.ceil(medicines.length / medicinesPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                paginateMedicines();
+            }
+        });
+
+        filterAndSortMedicines(); // Initial filter and sort on page load
+
+
+
+        // Handle form submission using AJAX
+        $(document).on("submit", ".add-to-cart-form", function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            var form = $(this);
+            var formData = form.serialize(); // Serialize the form data
+
+            $.ajax({
+                url: form.attr("action"),
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Handle success (e.g., show a message, update cart icon, etc.)
+                    alert("Item added to cart successfully!");
+                },
+                error: function (xhr, status, error) {
+                    // Handle error (e.g., show an error message)
+                    alert("An error occurred while adding the item to the cart.");
+                }
+            });
+        });
+    });
+</script>

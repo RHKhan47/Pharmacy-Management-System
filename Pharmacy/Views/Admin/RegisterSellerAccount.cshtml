@@ -1,0 +1,113 @@
+﻿@model IEnumerable<Pharma.Models.Seller>
+
+@{
+    ViewBag.Title = "Register Seller Account";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<div class="container mt-3">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Seller Registration Form</h5>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("RegisterSellerAccount", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.First().Username, new { @class = "control-label" })
+                            @Html.TextBox("Username", null, new { @class = "form-control" })
+                            @Html.ValidationMessage("Username", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.First().Password, new { @class = "control-label" })
+                            @Html.Password("Password", null, new { @class = "form-control" })
+                            @Html.ValidationMessage("Password", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.First().Email, new { @class = "control-label" })
+                            @Html.TextBox("Email", null, new { @class = "form-control" })
+                            @Html.ValidationMessage("Email", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.First().FullName, new { @class = "control-label" })
+                            @Html.TextBox("FullName", null, new { @class = "form-control" })
+                            @Html.ValidationMessage("FullName", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.First().Phone, new { @class = "control-label" })
+                            @Html.TextBox("Phone", null, new { @class = "form-control" })
+                            @Html.ValidationMessage("Phone", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-success">Register</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search by Username">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover" id="sellerTable">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Full Name</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var seller in Model)
+                            {
+                                <tr>
+                                    <td>@seller.Username</td>
+                                    <td>@seller.Email</td>
+                                    <td>@seller.FullName</td>
+                                    <td>@seller.Phone</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('#searchInput').on('input', function () {
+                var searchText = $(this).val().toLowerCase();
+                $('#sellerTable tbody tr').filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1)
+                });
+            });
+        });
+    </script>
+}

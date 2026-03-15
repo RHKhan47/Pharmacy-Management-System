@@ -1,0 +1,197 @@
+@{
+    ViewBag.Title = "Dashboard";
+    ViewBag.Header = "Dashboard";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>@ViewBag.Title</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQm5B+6xHq8E6mZpWnDhX5O59Oz5YgSw1A0W9U+f4/UfE09z63SpF9JhU" crossorigin="anonymous">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .table-container {
+            max-height: 282px; /* Adjust the maximum height as needed */
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="list-group">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            Customer Management
+                        </div>
+                        <div class="card-body">
+                            <a href="@Url.Action("Display_Customer", "Admin")" class="list-group-item list-group-item-action">Manage Roles & Permissions</a>
+                            <a href="@Url.Action("Create_Customer_Account", "Admin")" class="list-group-item list-group-item-action">Register Customer</a>
+                            @*<a href="@Url.Action("View_Complain", "Admin")" class="list-group-item list-group-item-action">View Complain</a>*@
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header bg-secondary text-white">
+                            Seller Management
+                        </div>
+                        <div class="card-body">
+                            <a href="@Url.Action("ManageSeller", "Admin")" class="list-group-item list-group-item-action">Manage Roles & Permissions</a>
+                            <a href="@Url.Action("RegisterSellerAccount", "Admin")" class="list-group-item list-group-item-action">Register Seller</a>
+                            @*<a href="@Url.Action("#", "Admin")" class="list-group-item list-group-item-action">View Request</a>*@
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header bg-secondary text-white">
+                            Sales Overview
+                        </div>
+                        <div class="card-body">
+                            <a href="@Url.Action("Report", "Admin")" class="list-group-item list-group-item-action">Sales Report</a>
+                            <a href="@Url.Action("DataAnalysis", "Admin")" class="list-group-item list-group-item-action">Sales Analytics</a>
+                            <a href="@Url.Action("MedicineAnalysis", "Admin")" class="list-group-item list-group-item-action">Medicine Analytics</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        System Overview
+                    </div>
+                    <div class="card-body row">
+                        <!-- Top Row of Cards -->
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h2><i class="fa-solid fa-users-gear"></i> @ViewBag.TotalSellers</h2>
+                                    <h4>Sellers</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h2><i class="bi bi-people-fill"></i> @ViewBag.TotalCustomers</h2>
+                                    <h4>Customers</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h2><i class="bi bi-capsule"></i> @ViewBag.UniqueMedicines</h2>
+                                    <h4>Medicine</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-body row">
+                        <!-- Bottom Row of Cards -->
+                        <div class="col-md-4 mt-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h2><i class="fa-solid fa-warehouse"></i> @ViewBag.TotalMedicines</h2>
+                                    <h4>Inventory</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h2><i class="fa-solid fa-truck-fast"></i> @ViewBag.OutForDeliveryOrdersCount</h2>
+                                    <h4>On Delivery</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h2><i class="fa-solid fa-hourglass-half"></i> @ViewBag.PendingOrdersCount</h2>
+                                    <h4>Pending</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 mb-3">
+                    <div class="card-header bg-secondary text-white">
+                        Pending Deliveries
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="pending-orders-table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewBag.PendingOrders != null && ViewBag.PendingOrders.Count > 0)
+                                    {
+                                        foreach (var order in ViewBag.PendingOrders)
+                                        {
+                                            <tr>
+                                                <td>@order.OrderID</td>
+                                                <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-center">No pending orders available.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5/0YGhu5R9n/mFZ/nGs4eBt51j3b2F5Hh2E5ZWbI" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybHBoXk5vbW8qS4ldzz8S1+ga8NkT5rd12B4Xn8Wvw+c6pOe" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js" integrity="sha384-Q2o+uxnWJrwprcDItWx0KCpq4oEyfV+lHBSQsJouaN/J6rMfdCd2YadpwJDeO/1T" crossorigin="anonymous"></script>
+
+    <script>
+        // Search functionality
+        $(document).ready(function () {
+            $('#search-btn').click(function () {
+                var searchText = $('#search-input').val().toLowerCase();
+                filterUsers(searchText);
+            });
+
+            function filterUsers(searchText) {
+                $('#user-table tbody tr').each(function () {
+                    var name = $(this).find('td:first').text().toLowerCase();
+                    var email = $(this).find('td:nth-child(2)').text().toLowerCase();
+                    if (name.includes(searchText) || email.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+﻿@model List<Pharma.Models.Medicine>
+
+@{
+    ViewBag.Title = "Medicine Inventory";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<div class="container mt-3">
+    <!-- Medicine Input Form Column -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Medicine Input Form</h5>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("Admin_Inventory", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+
+                if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="MedicineName" class="form-label">Medicine Name</label>
+                        <input type="text" class="form-control" id="MedicineName" name="MedicineName" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="GenericName" class="form-label">Generic Name</label>
+                        <input type="text" class="form-control" id="GenericName" name="GenericName" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="Manufacturer" class="form-label">Manufacturer</label>
+                        <input type="text" class="form-control" id="Manufacturer" name="Manufacturer" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="DosageForm" class="form-label">Dosage Form</label>
+                        <select class="form-select" id="DosageForm" name="DosageForm" required>
+                            <option value="">Select Dosage Form</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Capsule">Capsule</option>
+                            <option value="Syrup">Syrup</option>
+                            <option value="Injection">Injection</option>
+                            <option value="Cream">Cream</option>
+                            <option value="Ointment">Ointment</option>
+                            <option value="Gel">Gel</option>
+                            <option value="Suspension">Suspension</option>
+                            <option value="Solution">Solution</option>
+                            <option value="Patch">Patch</option>
+                            <option value="Lozenge">Lozenge</option>
+                            <option value="Drop">Drop</option>
+                            <option value="Inhaler">Inhaler</option>
+                            <option value="Suppository">Suppository</option>
+                            <option value="Mouthwash">Mouthwash</option>
+                            <option value="Foam">Foam</option>
+                            <option value="Powder">Powder</option>
+                            <option value="Film">Film</option>
+                            <option value="Spray">Spray</option>
+
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="Strength" class="form-label">Strength</label>
+                        <input type="text" class="form-control" id="Strength" name="Strength" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="Quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="Quantity" name="Quantity" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="Price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="Price" name="Price" step="0.01" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="Category" class="form-label">Category</label>
+                        <select class="form-select" id="Category" name="Category" required>
+                            <option value="">Select Category</option>
+                            <option value="Analgesics">Analgesics</option>
+                            <option value="Antibiotics">Antibiotics</option>
+                            <option value="Antivirals">Antivirals</option>
+                            <option value="Antifungals">Antifungals</option>
+                            <option value="Antihistamines">Antihistamines</option>
+                            <option value="Antidepressants">Antidepressants</option>
+                            <option value="Antacids">Antacids</option>
+                            <option value="Antihypertensives">Antihypertensives</option>
+                            <option value="Antidiabetics">Antidiabetics</option>
+
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="ImageFile" class="form-label">Image</label>
+                    <input type="file" class="form-control" id="ImageFile" name="ImageFile" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add Medicine</button>
+            }
+        </div>
+    </div>
+
+    <!-- Medicine Inventory Table Column -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-bordered mt-3" id="medicineTable">
+                    <thead style="position: sticky; top: 0; background-color: white;">
+                        <tr>
+                            <th>Name</th>
+                            <th>Generic Name</th>
+                            <th>Manufacturer</th>
+                            <th>Dosage Form</th>
+                            <th>Strength</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MedicineName</td>
+                                <td>@item.GenericName</td>
+                                <td>@item.Manufacturer</td>
+                                <td>@item.DosageForm</td>
+                                <td>@item.Strength</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Price</td>
+                                <td>@item.Category</td>
+                                <td>
+                                    @if (item.ImageData != null)
+                                    {
+                                        <img src="@Url.Action("GetImage", "Admin", new { id = item.MedicineID })" alt="Medicine Image" style="width: 50px; height: 50px;" />
+                                    }
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#updateModal" data-id="@item.MedicineID">Update</button>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteMedicine(@item.MedicineID)">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Medicine</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("UpdateMedicine", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("MedicineID", "", new { id = "UpdateMedicineID" })
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="UpdateMedicineName" class="form-label">Medicine Name</label>
+                            <input type="text" class="form-control" id="UpdateMedicineName" name="MedicineName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="UpdateGenericName" class="form-label">Generic Name</label>
+                            <input type="text" class="form-control" id="UpdateGenericName" name="GenericName" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="UpdateManufacturer" class="form-label">Manufacturer</label>
+                            <input type="text" class="form-control" id="UpdateManufacturer" name="Manufacturer" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="UpdateDosageForm" class="form-label">Dosage Form</label>
+                            <select class="form-select" id="UpdateDosageForm" name="DosageForm" required>
+                                <option value="">Select Dosage Form</option>
+                                <option value="Tablet">Tablet</option>
+                                <option value="Capsule">Capsule</option>
+                                <option value="Syrup">Syrup</option>
+                                <option value="Injection">Injection</option>
+                                <option value="Cream">Cream</option>
+                                <option value="Ointment">Ointment</option>
+                                <option value="Gel">Gel</option>
+                                <option value="Suspension">Suspension</option>
+                                <option value="Solution">Solution</option>
+                                <option value="Patch">Patch</option>
+                                <option value="Lozenge">Lozenge</option>
+                                <option value="Drop">Drop</option>
+                                <option value="Inhaler">Inhaler</option>
+                                <option value="Suppository">Suppository</option>
+                                <option value="Mouthwash">Mouthwash</option>
+                                <option value="Foam">Foam</option>
+                                <option value="Powder">Powder</option>
+                                <option value="Film">Film</option>
+                                <option value="Spray">Spray</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="UpdateStrength" class="form-label">Strength</label>
+                            <input type="text" class="form-control" id="UpdateStrength" name="Strength" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="UpdateQuantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="UpdateQuantity" name="Quantity" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="UpdatePrice" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="UpdatePrice" name="Price" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="UpdateCategory" class="form-label">Category</label>
+                            <select class="form-select" id="UpdateCategory" name="Category" required>
+                                <option value="">Select Category</option>
+                                <option value="Analgesics">Analgesics</option>
+                                <option value="Antibiotics">Antibiotics</option>
+                                <option value="Antivirals">Antivirals</option>
+                                <option value="Antifungals">Antifungals</option>
+                                <option value="Antihistamines">Antihistamines</option>
+                                <option value="Antidepressants">Antidepressants</option>
+                                <option value="Antacids">Antacids</option>
+                                <option value="Antihypertensives">Antihypertensives</option>
+                                <option value="Antidiabetics">Antidiabetics</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateImageFile" class="form-label">Image</label>
+                        <input type="file" class="form-control" id="UpdateImageFile" name="ImageFile">
+                    </div>
+                    <button type="submit" class="btn btn-warning">Update Medicine</button>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Filter the table based on search input
+            $("#searchInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#medicineTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Handle the click event on the Update button
+            $('#updateModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget); // Button that triggered the modal
+                var medicineID = button.data('id'); // Extract info from data-* attributes
+
+                // AJAX request to get medicine details
+                $.ajax({
+                    url: '/Admin/GetMedicineDetails',
+                    type: 'GET',
+                    data: { id: medicineID },
+                    success: function (data) {
+                        $('#UpdateMedicineID').val(data.MedicineID);
+                        $('#UpdateMedicineName').val(data.MedicineName);
+                        $('#UpdateGenericName').val(data.GenericName);
+                        $('#UpdateManufacturer').val(data.Manufacturer);
+                        $('#UpdateDosageForm').val(data.DosageForm);
+                        $('#UpdateStrength').val(data.Strength);
+                        $('#UpdateQuantity').val(data.Quantity);
+                        $('#UpdatePrice').val(data.Price);
+                        $('#UpdateCategory').val(data.Category);
+                        // Handle image file separately if needed
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error fetching medicine details: " + error);
+                    }
+                });
+            });
+
+            // Handle the delete button click event
+            window.deleteMedicine = function (id) {
+                if (confirm('Are you sure you want to delete this medicine?')) {
+                    $.ajax({
+                        url: '/Admin/DeleteMedicine',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (result) {
+                            // Optionally, you can reload the page or remove the row from the table
+                            location.reload();
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Error deleting medicine: " + error);
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+}
+

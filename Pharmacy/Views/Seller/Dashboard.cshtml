@@ -1,0 +1,176 @@
+﻿@model Pharma.Models.SellerDashboardViewModel
+
+@{
+    ViewBag.Title = "Seller Dashboard";
+    ViewBag.Header = "Dashboard";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<style>
+    .table-container {
+        max-height: 400px; /* Adjust the height as needed */
+        overflow-y: auto;
+    }
+</style>
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-md-2">
+            <!-- Reduced width for customer management -->
+            <div class="list-group">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        Customer Management
+                    </div>
+                    <div class="card-body">
+                        <a href="@Url.Action("Display_Customer_Seller", "Seller")" class="list-group-item list-group-item-action">Manage Roles & Permissions</a>
+                        <a href="@Url.Action("Create_Customer_Account_Seller", "Seller")" class="list-group-item list-group-item-action">Register Customer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <!-- Increased width for medicines table -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    System Overview
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h2><i class="bi bi-people"></i> @Model.TotalUsers</h2>
+                                <h4>Users</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h2><i class="bi bi-cart4"></i> @Model.TotalOrders</h2>
+                                <h4>Sales</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h2><i class="bi bi-capsule"></i> @Model.TotalMedicines</h2>
+                                <h4>Medicines</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h2><i class="fas fa-hourglass-half"></i> @Model.PendingOrdersCount</h2>
+                                <h4>Pending</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    Medicines
+                </div>
+                <div class="card-body">
+                    <input type="text" id="searchMedicine" class="form-control mb-3" placeholder="Search">
+
+                    <div class="table-container">
+                        <table id="medicinesTable" class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Generic Name</th>
+                                    <th>Manufacturer</th>
+                                    <th>Strength</th>
+                                    <th>Category</th>
+                                    <th>Image</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var medicine in Model.LatestMedicines)
+                                {
+                                    <tr>
+                                        <td>@medicine.MedicineID</td>
+                                        <td>@medicine.MedicineName</td>
+                                        <td>@medicine.GenericName</td>
+                                        <td>@medicine.Manufacturer</td>
+                                        <td>@medicine.Strength</td>
+                                        <td>@medicine.Category</td>
+                                        <td>
+                                            @if (medicine.ImageData != null)
+                                            {
+                                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(medicine.ImageData)" alt="Medicine Image" style="width: 50px; height: 50px;" />
+                                            }
+                                            else
+                                            {
+                                                <span>No Image</span>
+                                            }
+                                        </td>
+                                        <td>@medicine.Price.ToString("C")</td>
+                                        <td>@medicine.Quantity</td>
+                                        <td>
+                                            @using (Html.BeginForm("AddToList", "Seller", FormMethod.Post, new { @class = "add-to-list-form" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                @Html.Hidden("medicineId", medicine.MedicineID)
+                                                <input type="number" name="quantity" min="1" max="@medicine.Quantity" value="1" class="form-control mb-2" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Function to filter medicines table by name
+            $('#searchMedicine').keyup(function () {
+                var searchText = $(this).val().toLowerCase();
+                $('#medicinesTable tbody tr').each(function () {
+                    var nameText = $(this).find('td:nth-child(2)').text().toLowerCase();
+                    if (nameText.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Form submission for adding medicine to cart
+            $('.add-to-list-form').submit(function (event) {
+                event.preventDefault();
+                var $form = $(this);
+                var url = $form.attr('action');
+                var data = $form.serialize();
+
+                $.post(url, data, function (response) {
+                    alert('Medicine added to cart successfully!');
+                }).fail(function () {
+                    alert('Failed to add medicine to cart.');
+                });
+            });
+        });
+    </script>
+}

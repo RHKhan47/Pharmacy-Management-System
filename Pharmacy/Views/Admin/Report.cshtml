@@ -1,0 +1,268 @@
+﻿@model CombinedReportViewModel
+@{
+    ViewBag.Title = "Report";
+    Layout = "~/Views/Shared/_NewLayout.cshtml"; // Assuming a shared layout is used
+}
+
+<div class="container mt-4">
+    <!-- Single Dropdown for Time Period Selection -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">Select Time Period</h6>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonTimePeriod" data-bs-toggle="dropdown" aria-expanded="false">
+                Select Time Period
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonTimePeriod">
+                <li><a class="dropdown-item" href="javascript:void(0);" onclick="onTimePeriodChange('Current Month')">Current Month</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);" onclick="onTimePeriodChange('Last 15 Days')">Last 15 Days</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);" onclick="onTimePeriodChange('Last 7 Days')">Last 7 Days</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);" onclick="onTimePeriodChange('Last Month')">Last Month</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="tab1-tab" data-bs-toggle="tab" href="#tab1" role="tab" aria-controls="tab1" aria-selected="true">Revenue</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab2-tab" data-bs-toggle="tab" href="#tab2" role="tab" aria-controls="tab2" aria-selected="false">Sales</a>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content mt-4">
+        <!-- Revenue Tab -->
+        <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card border-success shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">Total Revenue</h6>
+                            <h3 class="card-text mb-1">@Model.TotalRevenue.ToString("C")</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-info shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">Online Sales Revenue</h6>
+                            <h3 class="card-text mb-1">@Model.TotalOnlineRevenue.ToString("C")</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-warning shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">In-Store Sales Revenue</h6>
+                            <h3 class="card-text mb-1">@Model.TotalInStoreRevenue.ToString("C")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Tab -->
+        <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card border-primary shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">Total Orders</h6>
+                            <h3 class="card-text mb-1">@Model.TotalOrders</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-success shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">Completed Orders</h6>
+                            <h3 class="card-text mb-1">@Model.CompletedOrders</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-warning shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">In-Store Purchases</h6>
+                            <h3 class="card-text mb-1">@Model.InStoreMedicines.Sum(m => m.QuantitySold)</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-danger shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase font-weight-bold">Pending Orders</h6>
+                            <h3 class="card-text mb-1">@Model.PendingOrders</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Most Sold Online Medicine Table -->
+    <div class="container-fluid mb-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Most Sold Online Medicine</h6>
+                        <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                            <table class="table table-hover table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity Sold</th>
+                                        <th>Price</th>
+                                        <th>Available Amount</th>
+                                        <th>Status</th>
+                                        @*<th>Info</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OnlineMedicines)
+                                    {
+                                        <tr>
+                                            <td>@item.MedicineName</td>
+                                            <td>@item.QuantitySold</td>
+                                            <td>$@item.Price.ToString("F2")</td>
+                                            <td>@item.AvailableAmount</td>
+                                            <td>
+                                                <span class="badge @(item.Status == "In Stock" ? "bg-success" : (item.Status == "Low Stock" ? "bg-warning" : "bg-danger"))">
+                                                    @item.Status
+                                                </span>
+                                            </td>
+                                            @*<td><a href="#" class="text-primary">View Details</a></td>*@
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Most Sold In-Store Medicine Table -->
+    <div class="container-fluid mb-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Most Sold In-Store Medicine</h6>
+                        <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                            <table class="table table-hover table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity Sold</th>
+                                        <th>Price</th>
+                                        <th>Available Amount</th>
+                                        <th>Status</th>
+                                        @*<th>Info</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.InStoreMedicines)
+                                    {
+                                        <tr>
+                                            <td>@item.MedicineName</td>
+                                            <td>@item.QuantitySold</td>
+                                            <td>$@item.Price.ToString("F2")</td>
+                                            <td>@item.AvailableAmount</td>
+                                            <td>
+                                                <span class="badge @(item.Status == "In Stock" ? "bg-success" : (item.Status == "Low Stock" ? "bg-warning" : "bg-danger"))">
+                                                    @item.Status
+                                                </span>
+                                            </td>
+                                            @*<td><a href="#" class="text-primary">View Details</a></td>*@
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Most Overall Sold Medicine Table -->
+    <div class="container-fluid mb-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title mb-0">Most Overall Sold Medicine</h6>
+                        <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                            <table class="table table-hover table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity Sold</th>
+                                        <th>Price</th>
+                                        <th>Available Amount</th>
+                                        <th>Status</th>
+                                        @*<th>Info</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OverallMedicines)
+                                    {
+                                        <tr>
+                                            <td>@item.MedicineName</td>
+                                            <td>@item.QuantitySold</td>
+                                            <td>$@item.Price.ToString("F2")</td>
+                                            <td>@item.AvailableAmount</td>
+                                            <td>
+                                                <span class="badge @(item.Status == "In Stock" ? "bg-success" : (item.Status == "Low Stock" ? "bg-warning" : "bg-danger"))">
+                                                    @item.Status
+                                                </span>
+                                            </td>
+                                            @*<td><a href="#" class="text-primary">View Details</a></td>*@
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get the active tab from the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab') || 'tab1'; // Default to 'tab1' if no parameter is present
+
+        // Activate the correct tab
+        const tab = new bootstrap.Tab(document.getElementById(activeTab + '-tab'));
+        tab.show();
+
+        // Add event listeners to update the URL with the active tab
+        document.querySelectorAll('#myTab a[data-bs-toggle="tab"]').forEach(function(tabLink) {
+            tabLink.addEventListener('click', function() {
+                const targetTab = tabLink.getAttribute('href').substring(1);
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('tab', targetTab);
+                history.replaceState(null, '', newUrl); // Update URL without reloading
+            });
+        });
+    });
+
+    function onTimePeriodChange(timePeriod) {
+        // Preserve the active tab in the query parameter
+        const activeTab = document.querySelector('#myTab .nav-link.active').getAttribute('href').substring(1);
+        const newUrl = `@Url.Action("Report", "Admin")?timePeriod=${timePeriod}&tab=${activeTab}`;
+
+        // Redirect with the selected time period and active tab
+        window.location.href = newUrl;
+    }
+</script>
+

@@ -1,0 +1,31 @@
+﻿@model IEnumerable<Pharma.Models.OrderItem>
+
+@{
+    ViewBag.Title = "Receipt";
+}
+
+<h2>Receipt</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Medicine Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.MedicineName</td>
+                <td>@item.Quantity</td>
+                <td>@item.Price</td>
+                <td>@item.Total</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p><strong>Total Amount:</strong> @Model.Sum(item => item.Total)</p>

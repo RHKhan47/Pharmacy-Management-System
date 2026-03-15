@@ -1,0 +1,273 @@
+﻿@model IEnumerable<Pharma.Models.Order>
+@{
+    ViewBag.Title = "Order History";
+    ViewBag.Header = "Order History";
+    Layout = "~/Views/Shared/User_Layout.cshtml";
+}
+
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="container mx-auto px-4 mt-8">
+        <h1 class="text-2xl font-bold mb-4">Order History</h1>
+
+        <div class="relative mb-4">
+            <input type="text" id="search" name="search" placeholder="Enter keywords..." class="pl-4 pr-8 py-2 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        </div>
+
+        <div class="relative mb-4">
+            <select id="filter" name="filter" class="pl-4 pr-8 py-2 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+@*                <option value="InProcess">In Process</option>
+*@                <option value="OutForDelivery">Out For Delivery</option>
+                <option value="Delivered">Delivered</option>
+            </select>
+        </div>
+
+
+        <div class="overflow-x-auto">
+            <table id="order-table" class="min-w-full bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-md">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-gray-700">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Order Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Total Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+
+                @if (Model != null && Model.Any())
+                {
+                    <tbody>
+                        @Html.AntiForgeryToken()
+                        @foreach (var orderMedicine in Model)
+                        {
+                            <tr class="bg-white dark:bg-gray-800">
+                                <td class="px-6 py-4 whitespace-nowrap">@orderMedicine.OrderID</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if (orderMedicine.Status == Pharma.Models.OrderStatus.Pending)
+                                    {
+                                        <span class="inline-block px-2 py-1 rounded bg-yellow-200 text-yellow-800">
+                                            @orderMedicine.Status
+                                        </span>
+                                    }
+                                    else if (orderMedicine.Status == Pharma.Models.OrderStatus.OutForDelivery)
+                                    {
+                                        <span class="inline-block px-2 py-1 rounded bg-blue-200 text-blue-800">
+                                            @orderMedicine.Status
+                                        </span>
+                                    }
+                                    else if (orderMedicine.Status == Pharma.Models.OrderStatus.Delivered)
+                                    {
+                                        <span class="inline-block px-2 py-1 rounded bg-green-200 text-green-800">
+                                            @orderMedicine.Status
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-block px-2 py-1 rounded bg-gray-200 text-gray-800">
+                                            @orderMedicine.Status
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">@orderMedicine.OrderDate</td>
+                                <td class="px-6 py-4 whitespace-nowrap">@orderMedicine.TotalPrice</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="#" class="text-blue-600 hover:underline" data-orderid="@orderMedicine.OrderID">View Details</a>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                }
+                else
+                {
+                    <p>No order is placed yet.</p>
+                }
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-center mt-4">
+            <button class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md mr-2 hover:bg-gray-300 focus:outline-none focus:bg-gray-300" onclick="changePage(-1)" disabled>&lt; Prev</button>
+            <button class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md ml-2 hover:bg-gray-300 focus:outline-none focus:bg-gray-300" onclick="changePage(1)">Next &gt;</button>
+        </div>
+    </div>
+
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-7xl">
+                <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                    <h5 class="text-lg font-medium text-gray-900 dark:text-white">Order Information</h5>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div id="orderDetailsContent">
+                        <!-- Order details content will be dynamically populated here -->
+                    </div>
+                </div>
+                <div class="flex justify-end p-4 border-t dark:border-gray-700">
+                    <button id="closeModalFooter" class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 focus:outline-none focus:bg-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            let currentPage = 1;
+            const rowsPerPage = 5; // Define how many rows you want per page
+            let filteredRows = $('#order-table tbody tr'); // Initial set of rows to be filtered
+
+            // Search Functionality
+            $('#search').on('keyup', function () {
+                filterTable();
+            });
+
+            // Filter by Order Status
+            $('#filter').on('change', function () {
+                filterTable();
+            });
+
+            function filterTable() {
+                const searchTerm = $('#search').val().toLowerCase();
+                const filterTerm = $('#filter').val().toLowerCase();
+
+                filteredRows = $('#order-table tbody tr').filter(function () {
+                    const orderID = $(this).find('td').eq(0).text().toLowerCase();
+                    const status = $(this).find('td').eq(1).text().toLowerCase();
+
+                    const matchesSearch = orderID.includes(searchTerm);
+                    const matchesFilter = filterTerm === '' || status.includes(filterTerm);
+
+                    return matchesSearch && matchesFilter;
+                });
+
+                // Hide all rows
+                $('#order-table tbody tr').hide();
+
+                // Handle pagination after filtering
+                currentPage = 1; // Reset to first page
+                showPage(currentPage);
+            }
+
+            function showPage(page) {
+                const startIndex = (page - 1) * rowsPerPage;
+                const endIndex = startIndex + rowsPerPage;
+
+                filteredRows.each(function (index) {
+                    if (index >= startIndex && index < endIndex) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                document.querySelector('button[onclick="changePage(-1)"]').disabled = page === 1;
+                document.querySelector('button[onclick="changePage(1)"]').disabled = endIndex >= filteredRows.length;
+            }
+
+            window.changePage = function (change) {
+                currentPage += change;
+                showPage(currentPage);
+            }
+
+            showPage(currentPage); // Initial page load
+        });
+
+    </script>
+
+    <script>
+    // Function to open the modal
+    function openModal() {
+        document.getElementById('orderDetailsModal').classList.remove('hidden');
+    }
+
+    // Function to close the modal
+    function closeModal() {
+        document.getElementById('orderDetailsModal').classList.add('hidden');
+    }
+
+    // Function to populate order details in a structured table format
+    function populateOrderDetails(orderId, modalBody) {
+        fetch('@Url.Action("GetOrderDetails", "User")?orderId=' + orderId)
+            .then(response => response.json())
+            .then(data => {
+                var detailsHtml = `
+                    <div class="container p-4">
+                        <table class="min-w-full bg-white border dark:bg-gray-800 dark:border-gray-700 shadow-md">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicine Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generic Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosage Form</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Strength</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.OrderDetails.map(detail => `
+                                    <tr class="bg-white dark:bg-gray-800">
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.MedicineName}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.GenericName}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.Manufacturer}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.DosageForm}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.Strength}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.Quantity}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.Price}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${detail.Category}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="mt-4 flex justify-end">
+                            <h5 class="text-lg font-semibold">Total: ${data.TotalPrice}</h5>
+                        </div>
+                    </div>
+                `;
+                modalBody.innerHTML = detailsHtml;
+            })
+            .catch(error => {
+                modalBody.textContent = 'Error loading order details';
+                console.error('Error fetching order details:', error);
+            });
+    }
+
+    // Event listener for showing modal and populating order details
+    document.addEventListener('click', function(event) {
+        if (event.target.matches('[data-orderid]')) {
+            event.preventDefault();
+            var orderId = event.target.getAttribute('data-orderid');
+            var modalBody = document.getElementById('orderDetailsContent');
+            modalBody.textContent = 'Loading order details for order ID ' + orderId + '...';
+
+            // Call function to populate order details in a structured table format
+            populateOrderDetails(orderId, modalBody);
+            openModal();
+        }
+    });
+
+    // Event listener for closing modal
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.getElementById('closeModalFooter').addEventListener('click', closeModal);
+    </script>
+
+
+
+</body>
+

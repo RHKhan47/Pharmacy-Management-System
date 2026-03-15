@@ -1,0 +1,339 @@
+﻿@{
+    ViewBag.Title = "Order Management";
+    Layout = "~/Views/Shared/_NewLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed"
+                    type="button" role="tab" aria-controls="completed" aria-selected="true">
+                Completed Orders
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="in-process-tab" data-bs-toggle="tab" data-bs-target="#in-process"
+                    type="button" role="tab" aria-controls="in-process" aria-selected="false">
+                On Delivery <span class="badge bg-warning text-dark" id="inProcessBadge"></span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button"
+                    role="tab" aria-controls="pending" aria-selected="false">
+                Pending <span class="badge bg-danger" id="pendingBadge"></span>
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="orderTabsContent">
+        <!-- Completed Orders Tab -->
+        <div class="tab-pane fade show active" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+            <div class="mt-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input class="form-control" id="searchCompleted" type="text" placeholder="Search Completed Orders by Order ID">
+                </div>
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-bordered table-striped-rows table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Price</th>
+                                <th>View Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completedOrders">
+                            @foreach (var order in ViewBag.CompletedOrders)
+                            {
+                                <tr>
+                                    <td>@order.OrderID</td>
+                                    <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@order.TotalPrice.ToString("C")</td>
+                                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#orderDetailsModal" data-bs-orderid="@order.OrderID">View Details</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="Completed orders pagination">
+                    <ul class="pagination">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- In Process Orders Tab -->
+        <div class="tab-pane fade" id="in-process" role="tabpanel" aria-labelledby="in-process-tab">
+            <div class="mt-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input class="form-control" id="searchInProcess" type="text" placeholder="Search In Process Orders by Order ID">
+                </div>
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-bordered table-striped-rows table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Price</th>
+                                <th>View Details</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inProcessOrders">
+                            @foreach (var order in ViewBag.InProcessOrders)
+                            {
+                                <tr>
+                                    <td>@order.OrderID</td>
+                                    <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@order.TotalPrice.ToString("C")</td>
+                                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#orderDetailsModal" data-bs-orderid="@order.OrderID">View Details</a></td>
+                                    <td><button class="btn btn-sm btn-success" onclick="markOrderAsDelivered(@order.OrderID)">Delivered</button></td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="In process orders pagination">
+                    <ul class="pagination">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Pending Orders Tab -->
+        <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+            <div class="mt-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input class="form-control" id="searchPending" type="text" placeholder="Search Pending Orders by Order ID">
+                </div>
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-bordered table-striped-rows table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Price</th>
+                                <th>View Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingOrders">
+                            @foreach (var order in ViewBag.PendingOrders)
+                            {
+                                <tr>
+                                    <td>@order.OrderID</td>
+                                    <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@order.TotalPrice.ToString("C")</td>
+                                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#orderDetailsModal" data-bs-orderid="@order.OrderID">View Details</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="Pending orders pagination">
+                    <ul class="pagination">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetailsContent">
+                    <!-- Order details content will be dynamically populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to populate order details in a structured table format
+    function populateOrderDetails(orderId, modalBody) {
+        fetch('@Url.Action("GetOrderDetails", "Admin")?orderId=' + orderId)
+            .then(response => response.json())
+            .then(data => {
+                var detailsHtml = `
+                    <div class="container p-4">
+                        <h5>Order Details</h5>
+                        <table class="table table-bordered mb-4">
+                            <tr>
+                                <td><strong>Order ID:</strong></td>
+                                <td>${data.OrderID}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order Date:</strong></td>
+                                <td>${data.OrderDate}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Price:</strong></td>
+                                <td>${data.TotalPrice}</td>
+                            </tr>
+                        </table>
+
+                        <h5>Customer Details</h5>
+                        <table class="table table-bordered mb-4">
+                            <tr>
+                                <td><strong>Name:</strong></td>
+                                <td>${data.Customer.FullName}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>${data.Customer.Email}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phone:</strong></td>
+                                <td>${data.Customer.Phone}</td>
+                            </tr>
+                            <tr>
+                               <td><strong>Address:</strong></td>
+                               <td>${data.Customer.Address}</td>
+                            </tr>
+                        </table>
+
+                        <h5 class="mb-3">Order Items</h5>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Medicine Name</th>
+                                    <th>Generic Name</th>
+                                    <th>Manufacturer</th>
+                                    <th>Dosage Form</th>
+                                    <th>Strength</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Category</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.OrderDetails.map(detail => `
+                                    <tr>
+                                        <td>${detail.MedicineName}</td>
+                                        <td>${detail.GenericName}</td>
+                                        <td>${detail.Manufacturer}</td>
+                                        <td>${detail.DosageForm}</td>
+                                        <td>${detail.Strength}</td>
+                                        <td>${detail.Quantity}</td>
+                                        <td>${detail.Price}</td>
+                                        <td>${detail.Category}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h5>Total: ${data.TotalPrice}</h5>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                modalBody.innerHTML = detailsHtml;
+            })
+            .catch(error => {
+                modalBody.textContent = 'Error loading order details';
+                console.error('Error fetching order details:', error);
+            });
+    }
+
+    // Event listener for showing modal and populating order details
+    document.getElementById('orderDetailsModal').addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var orderId = button.getAttribute('data-bs-orderid');
+        var modalBody = this.querySelector('.modal-body #orderDetailsContent');
+        modalBody.textContent = 'Loading order details for order ID ' + orderId + '...';
+
+        // Call function to populate order details in a structured table format
+        populateOrderDetails(orderId, modalBody);
+    });
+
+    // Function to handle searching orders by Order ID
+    function searchOrders(inputId, tableBodyId) {
+        document.getElementById(inputId).addEventListener('keyup', function () {
+            let value = this.value.toLowerCase();
+            let rows = document.querySelectorAll(`#${tableBodyId} tr`);
+            rows.forEach(row => {
+                let orderId = row.cells[0].textContent.toLowerCase();
+                row.style.display = orderId.includes(value) ? '' : 'none';
+            });
+            updateBadgeCount(tableBodyId, tableBodyId + 'Badge');
+        });
+    }
+
+    // Function to update badge count based on visible rows
+    function updateBadgeCount(tableBodyId, badgeId) {
+        let rows = document.querySelectorAll(`#${tableBodyId} tr`);
+        let visibleRows = Array.from(rows).filter(row => row.style.display !== 'none').length;
+        document.getElementById(badgeId).textContent = visibleRows;
+    }
+
+    // Initialize search functionality for each tab
+    searchOrders('searchCompleted', 'completedOrders');
+    searchOrders('searchInProcess', 'inProcessOrders');
+    searchOrders('searchPending', 'pendingOrders');
+
+    // Initial badge update
+    updateBadgeCount('inProcessOrders', 'inProcessBadge');
+    updateBadgeCount('pendingOrders', 'pendingBadge');
+
+    function markOrderAsDelivered(orderId) {
+    if (confirm('Are you sure you want to mark this order as delivered?')) {
+        fetch('@Url.Action("MarkAsDelivered")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ orderId: orderId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload(); // Reload the page to reflect the changes
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the order.');
+        });
+    }
+}
+
+</script>
+

@@ -1,0 +1,137 @@
+﻿@model List<Pharma.Models.Order>
+
+@{
+    ViewBag.Title = "Pending Orders";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<div class="container">
+    <h2>Pending Orders</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- Search input field -->
+    <div class="form-group">
+        <input type="text" id="searchOrderID" class="form-control" placeholder="Search by Order ID">
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Order Date</th>
+                <th>Total Price</th>
+                <th>Status Update</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td class="order-id">@order.OrderID</td>
+                    <td>@order.Customer.FullName</td>
+                    <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
+                    <td>@order.TotalPrice.ToString("C")</td>
+                    <td>
+                        @using (Html.BeginForm("UpdateOrderStatus", "Seller", FormMethod.Post))
+                        {
+                            @Html.Hidden("orderId", order.OrderID)
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">Mark as Out For Delivery</button>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" type="button" data-toggle="collapse" data-target="#orderDetails-@order.OrderID" aria-expanded="false" aria-controls="orderDetails-@order.OrderID">
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <div class="collapse" id="orderDetails-@order.OrderID">
+                            <table class="table table-bordered mt-2">
+                                <thead>
+                                    <tr>
+                                        <th>Medicine Name</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in order.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td>@item.Medicine.MedicineName</td>
+                                            <td>@item.Quantity</td>
+                                            <td>@item.Price.ToString("C")</td>
+                                            <td>
+                                                @{
+                                                    decimal total = item.Quantity * item.Price;
+                                                }
+                                                @total.ToString("C")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Orders", new { page = ViewBag.CurrentPage - 1 })" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Orders", new { page = i })">@i</a>
+                </li>
+            }
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Orders", new { page = ViewBag.CurrentPage + 1 })" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Function to filter orders table by Order ID
+            $('#searchOrderID').keyup(function () {
+                var searchValue = $(this).val().toLowerCase();
+                $('#ordersTableBody tr').each(function () {
+                    var orderIdText = $(this).find('.order-id').text().toLowerCase();
+                    if (orderIdText.includes(searchValue)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+        });
+    </script>
+}

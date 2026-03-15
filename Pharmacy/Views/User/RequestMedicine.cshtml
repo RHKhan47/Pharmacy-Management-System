@@ -1,0 +1,17 @@
+﻿﻿@{
+    ViewBag.Title = "Request Medicine";
+}
+
+<h2>Request Medicine</h2>
+
+@using (Html.BeginForm("RequestMedicine", "User", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.Label("Medicine Name")
+        @Html.TextBox("medicineName", null, new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+}

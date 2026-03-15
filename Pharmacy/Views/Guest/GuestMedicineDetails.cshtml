@@ -1,0 +1,130 @@
+﻿@model Pharma.Models.Medicine
+
+@{
+    ViewBag.Title = "GuestMedicineDetails";
+    Layout = "~/Views/Shared/Guest_Layout.cshtml";
+
+}
+
+<body class="bg-gray-100">
+    <div class="bg-white p-6 shadow-lg">
+        <div class="flex flex-col lg:flex-row justify-center items-center">
+            <!-- Main Product Image -->
+            <div class="w-full lg:w-1/3 mb-6 lg:mb-0 lg:pr-6">
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ImageData)" class="w-full h-auto" alt="Medicine Image">
+            </div>
+
+            <!-- Product Details -->
+            <div class="w-full lg:w-2/3 flex flex-col">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">@Model.MedicineName</h2>
+                    <p class="text-gray-600">@Model.GenericName</p>
+                    <div class="flex items-center mt-4">
+                        <span class="text-xl font-bold text-gray-800">$@Model.Price</span>
+                        <span class="text-indigo-600 ml-2">20% off</span>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="border-t border-b py-4">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="toggleContent('medicine-details')">
+                                <span class="font-medium text-gray-800">Medicine Details</span>
+                                <span class="text-gray-600">&#43;</span>
+                            </div>
+                            <div id="medicine-details" class="hidden-content mt-2 text-gray-600">
+                                <p><strong>Generic Name:</strong> @Model.GenericName</p>
+                                <p><strong>Manufacturer:</strong> @Model.Manufacturer</p>
+                                <p><strong>Dosage Form:</strong> @Model.DosageForm</p>
+                                <p><strong>Strength:</strong> @Model.Strength</p>
+                                <p><strong>Category:</strong> @Model.Category</p>
+                            </div>
+                        </div>
+                        <div class="border-b py-4">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="toggleContent('dosage')">
+                                <span class="font-medium text-gray-800">Dosage & Instructions</span>
+                                <span class="text-gray-600">&#43;</span>
+                            </div>
+                            <div id="dosage" class="hidden-content mt-2 text-gray-600">
+                                <p>
+                                    Take <strong>1-2 tablets</strong> every <strong>4-6 hours</strong> as needed. Do not exceed <strong>8 tablets</strong> in 24 hours unless directed by a doctor.
+                                </p>
+                                <p class="mt-2 font-medium">Suggested Usage:</p>
+                                <ul class="list-disc pl-5 mt-1">
+                                    <li>For headaches: Take 1 tablet at the onset of symptoms.</li>
+                                    <li>For muscle aches: Take 2 tablets if discomfort persists after 6 hours.</li>
+                                    <li>Consult your doctor if symptoms do not improve after 3 days.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="border-b py-4">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="toggleContent('delivery-returns')">
+                                <span class="font-medium text-gray-800">Delivery & Returns</span>
+                                <span class="text-gray-600">&#43;</span>
+                            </div>
+                            <div id="delivery-returns" class="hidden-content mt-2 text-gray-600">
+                                Free delivery on orders over $50. Return within 30 days if unopened and in original packaging.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Normal-sized Add to Cart Button -->
+                    <div class="mt-6">
+                        <form class="add-to-cart-form w-full lg:flex-1" action="@Url.Action("AddToCart", "User")" method="post" data-medicine-id="@Model.MedicineID">
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("medicineId", Model.MedicineID)
+                            @Html.Hidden("quantity", 1) <!-- Hidden field to capture default quantity -->
+                            <!-- Adjusted button width -->
+                            <button type="submit" class="w-1/3 bg-indigo-600 text-white font-bold py-2 px-4 rounded hover:bg-indigo-700 transition duration-200">
+                                Add To Cart
+                            </button>
+                        </form>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 border-t pt-4 text-center text-gray-600 text-sm">
+            By placing an order, you agree to our <a href="#" class="text-indigo-600 hover:underline">terms and conditions</a> and <a href="#" class="text-indigo-600 hover:underline">privacy policy</a>.
+        </footer>
+    </div>
+
+    <!-- jQuery Script -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function toggleContent(id) {
+            const content = document.getElementById(id);
+            if (content.style.display === "none" || content.style.display === "") {
+                content.style.display = "block";
+            } else {
+                content.style.display = "none";
+            }
+        }
+
+        $(document).ready(function () {
+            // Handle form submission using AJAX
+            $(document).on("submit", ".add-to-cart-form", function (event) {
+                event.preventDefault(); // Prevent the form from submitting normally
+
+                var form = $(this);
+                var formData = form.serialize(); // Serialize the form data
+
+                $.ajax({
+                    url: form.attr("action"),
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        // Show alert message
+                        alert("Item added to cart successfully!");
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error (e.g., show an error message)
+                        alert("An error occurred while adding the item to the cart.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>

@@ -1,0 +1,147 @@
+﻿@model List<Pharma.Models.Medicine>
+
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" id="viewCartModal">
+    <div class="relative bg-white dark:bg-gray-800 w-full max-w-full h-full max-h-full overflow-auto p-5 shadow-lg">
+        <div class="flex justify-between items-center border-b pb-4">
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Shopping Cart</h2>
+            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" onclick="closeModal()">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="overflow-x-auto mt-4">
+            @if (Model != null && Model.Any())
+            {
+                using (Html.BeginForm("PlaceOrder", "User", FormMethod.Post))
+                {
+                    <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="bg-gray-50 dark:bg-gray-700 text-xs text-gray-700 uppercase dark:text-gray-400">
+                            <tr>
+                                <th class="px-6 py-3">Image</th>
+                                <th class="px-6 py-3">Product</th>
+                                <th class="px-6 py-3">Qty</th>
+                                <th class="px-6 py-3">Per Unit</th>
+                                <th class="px-6 py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @Html.AntiForgeryToken()
+                            @foreach (var cartMedicine in Model)
+                            {
+                                <tr class="border-b bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <td class="px-6 py-4">
+                                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(cartMedicine.ImageData)" class="w-16 h-16 object-cover rounded" alt="@cartMedicine.MedicineName">
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-900 dark:text-white font-semibold">
+                                        @cartMedicine.MedicineName
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            Strength: @cartMedicine.Strength<br>
+                                            Manufacturer: @cartMedicine.Manufacturer
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <button type="button" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300" onclick="decrementQuantity(this)">-</button>
+                                            <input type="number" name="quantities[]" value="@(cartMedicine.Quantity > 1 ? 1 : 0)" min="@(cartMedicine.Quantity > 1 ? 1 : 0)" max="@cartMedicine.Quantity" class="mx-2 w-12 px-2 py-1 border border-gray-300 rounded text-center text-gray-900 dark:text-gray-200 dark:border-gray-600 dark:bg-gray-700 quantity-input" />
+                                            <button type="button" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300" onclick="incrementQuantity(this)">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white total-price">$@cartMedicine.Price</td>
+                                    <td class="px-6 py-4 text-red-600 dark:text-red-500 cursor-pointer hover:underline remove-medicine" onclick="removeMedicine(this, '@cartMedicine.MedicineID')">Remove</td>
+                                    <input type="hidden" name="medicineIds[]" value="@cartMedicine.MedicineID" />
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="flex justify-between items-center mt-6">
+                        <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Total: <span id="totalPrice">$@ViewBag.TotalPrice</span>
+                        </div>
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-6 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                            Place Order
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-center text-gray-900 dark:text-white mt-4">Your cart is empty.</p>
+            }
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    function incrementQuantity(button) {
+        var input = button.previousElementSibling;
+        var maxValue = parseInt(input.getAttribute('max')); // Get the max value from the input field
+
+        if (parseInt(input.value) < maxValue) {
+            input.value = parseInt(input.value) + 1;
+        }
+        updateTotal();
+    }
+
+
+    function decrementQuantity(button) {
+        var input = button.nextElementSibling;
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+        updateTotal();
+    }
+
+    function updateTotal() {
+        var total = 0;
+        var rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            var price = parseFloat(row.querySelector('.total-price').textContent.replace('$', ''));
+            var quantity = parseInt(row.querySelector('.quantity-input').value);
+            total += price * quantity;
+        });
+        document.getElementById('totalPrice').textContent = '$' + total.toFixed(2);
+    }
+
+function removeMedicine(button, medicineId) {
+    $.ajax({
+        url: '@Url.Action("RemoveFromCart", "User")', // Use Url.Action to generate the correct URL
+        type: 'POST',
+        data: { id: medicineId },
+        success: function (response) {
+            if (response.success) {
+                // Remove the row from the table
+                button.closest('tr').remove();
+                updateTotal();
+
+                // Check if the table is empty
+                // Check if the table is empty
+                if ($('tbody tr').length === 0) {
+                    $('#viewCartModal .overflow-x-auto').html('<p class="text-center text-gray-900 dark:text-white mt-4">Your cart is empty.</p>');
+                }
+            } else {
+                alert('Error removing medicine from cart.');
+            }
+        },
+        error: function (xhr, status, error) {
+            alert('Error removing medicine from cart.');
+        }
+    });
+    }
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateTotal();
+    });
+</script>
+
+<!-- Additional Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/flowbite@2.1.0/dist/flowbite.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
